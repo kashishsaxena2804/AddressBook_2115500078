@@ -2,8 +2,8 @@
 using ModelLayer.DTO;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
-
-
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RepositoryLayer.Services
 {
@@ -16,26 +16,26 @@ namespace RepositoryLayer.Services
             _context = context;
         }
 
-        public async Task<List<AddressBookDTO>> GetAllContacts()
+        public List<AddressBookDTO> GetAllContacts()
         {
-            return await _context.AddressBookEntries.ToListAsync();
+            return _context.AddressBookEntries.ToList();
         }
 
-        public async Task<AddressBookDTO> GetContactById(int id)
+        public AddressBookDTO GetContactById(int id)
         {
-            return await _context.AddressBookEntries.FindAsync(id);
+            return _context.AddressBookEntries.Find(id);
         }
 
-        public async Task<AddressBookDTO> AddContact(AddressBookDTO contact)
+        public AddressBookDTO AddContact(AddressBookDTO contact)
         {
             _context.AddressBookEntries.Add(contact);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return contact;
         }
 
-        public async Task<AddressBookDTO> UpdateContact(int id, AddressBookDTO contact)
+        public AddressBookDTO UpdateContact(int id, AddressBookDTO contact)
         {
-            var existingContact = await _context.AddressBookEntries.FindAsync(id);
+            var existingContact = _context.AddressBookEntries.Find(id);
             if (existingContact == null) return null;
 
             existingContact.Name = contact.Name;
@@ -43,17 +43,17 @@ namespace RepositoryLayer.Services
             existingContact.PhoneNumber = contact.PhoneNumber;
             existingContact.Address = contact.Address;
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return existingContact;
         }
 
-        public async Task<bool> DeleteContact(int id)
+        public bool DeleteContact(int id)
         {
-            var contact = await _context.AddressBookEntries.FindAsync(id);
+            var contact = _context.AddressBookEntries.Find(id);
             if (contact == null) return false;
 
             _context.AddressBookEntries.Remove(contact);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return true;
         }
     }

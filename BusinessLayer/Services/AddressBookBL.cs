@@ -1,7 +1,7 @@
 ﻿using BusinessLayer.Interfaces;
 using ModelLayer.DTO;
 using RepositoryLayer.Interfaces;
-
+using System.Collections.Generic;
 
 namespace BusinessLayer.Services
 {
@@ -14,29 +14,29 @@ namespace BusinessLayer.Services
             _addressBookRL = addressBookRL;
         }
 
-        public async Task<List<AddressBookDTO>> GetAllContacts()
+        public List<AddressBookDTO> GetAllContacts()
         {
-            return await _addressBookRL.GetAllContacts();
+            return _addressBookRL.GetAllContacts();
         }
 
-        public async Task<AddressBookDTO> GetContactById(int id)
+        public AddressBookDTO GetContactById(int id)
         {
-            return await _addressBookRL.GetContactById(id);
+            return _addressBookRL.GetContactById(id);
         }
 
-        public async Task<AddressBookDTO> AddContact(AddressBookDTO contact)
+        public AddressBookDTO AddContact(AddressBookDTO contact)
         {
-            return await _addressBookRL.AddContact(contact);
+            return _addressBookRL.AddContact(contact);
         }
 
-        public async Task<AddressBookDTO> UpdateContact(int id,AddressBookDTO contact)
+        public AddressBookDTO UpdateContact(int id, AddressBookDTO contact)
         {
-            return await _addressBookRL.UpdateContact(id, contact);
+            return _addressBookRL.UpdateContact(id, contact);
         }
 
-        public async Task<bool> DeleteContact(int id)
+        public bool DeleteContact(int id)
         {
-            return await _addressBookRL.DeleteContact(id);
+            return _addressBookRL.DeleteContact(id);
         }
     }
 }
