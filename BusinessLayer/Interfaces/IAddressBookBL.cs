@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ModelLayer.DTO;
+
 
 namespace BusinessLayer.Interfaces
 {
-    internal class IAddressBookBL
+    public interface IAddressBookBL
     {
+        Task<List<AddressBookDTO>> GetAllContacts();
+        Task<AddressBookDTO > GetContactById(int id);
+        Task<AddressBookDTO > AddContact(AddressBookDTO contact);
+        Task<AddressBookDTO> UpdateContact(int id,AddressBookDTO contact);
+        Task<bool> DeleteContact(int id);
     }
 }
