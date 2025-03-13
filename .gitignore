@@ -1,7 +1,0 @@
-.vs
-.obj/
-.bin/
-BusinessLayer/obj/
-HelloGreetingApplication/obj/
-ModelLayer/obj/
-RepositoryLayer/obj/
