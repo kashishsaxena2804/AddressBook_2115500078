@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ModelLayer.DTO;
+using ModelLayer.Models;
 
 namespace RepositoryLayer.Context
 {
@@ -7,6 +7,6 @@ namespace RepositoryLayer.Context
     {
         public AddressBookDbContext(DbContextOptions<AddressBookDbContext> options) : base(options) { }
 
-        public DbSet<AddressBookDTO> AddressBookEntries { get; set; }
+        public DbSet<AddressBookEntry> AddressBookEntries { get; set; }
     }
 }

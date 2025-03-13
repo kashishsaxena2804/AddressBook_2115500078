@@ -1,5 +1,5 @@
 ﻿using BusinessLayer.Interfaces;
-using ModelLayer.DTO;
+using ModelLayer.Models;
 using RepositoryLayer.Interfaces;
 using System.Collections.Generic;
 
@@ -14,22 +14,22 @@ namespace BusinessLayer.Services
             _addressBookRL = addressBookRL;
         }
 
-        public List<AddressBookDTO> GetAllContacts()
+        public List<AddressBookEntry> GetAllContacts()
         {
             return _addressBookRL.GetAllContacts();
         }
 
-        public AddressBookDTO GetContactById(int id)
+        public AddressBookEntry GetContactById(int id)
         {
             return _addressBookRL.GetContactById(id);
         }
 
-        public AddressBookDTO AddContact(AddressBookDTO contact)
+        public AddressBookEntry AddContact(AddressBookEntry contact)
         {
             return _addressBookRL.AddContact(contact);
         }
 
-        public AddressBookDTO UpdateContact(int id, AddressBookDTO contact)
+        public AddressBookEntry UpdateContact(int id, AddressBookEntry contact)
         {
             return _addressBookRL.UpdateContact(id, contact);
         }

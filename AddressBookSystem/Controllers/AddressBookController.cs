@@ -1,11 +1,11 @@
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using ModelLayer.DTO;
+using ModelLayer.Models;
 using System.Collections.Generic;
 
 namespace AddressBookSystem.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AddressBookController : ControllerBase
     {
@@ -17,13 +17,13 @@ namespace AddressBookSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<AddressBookDTO>> GetAllContacts()
+        public ActionResult<List<AddressBookEntry>> GetAllContacts()
         {
             return Ok(_addressBookBL.GetAllContacts());
         }
 
         [HttpGet("{id}")]
-        public ActionResult<AddressBookDTO> GetContactById(int id)
+        public ActionResult<AddressBookEntry> GetContactById(int id)
         {
             var contact = _addressBookBL.GetContactById(id);
             if (contact == null) return NotFound();
@@ -31,14 +31,14 @@ namespace AddressBookSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult<AddressBookDTO> AddContact([FromBody] AddressBookDTO contact)
+        public ActionResult<AddressBookEntry> AddContact([FromBody] AddressBookEntry contact)
         {
             var newContact = _addressBookBL.AddContact(contact);
             return CreatedAtAction(nameof(GetContactById), new { id = newContact.Id }, newContact);
         }
 
         [HttpPut("{id}")]
-        public ActionResult<AddressBookDTO> UpdateContact(int id, [FromBody] AddressBookDTO contact)
+        public ActionResult<AddressBookEntry> UpdateContact(int id, [FromBody] AddressBookEntry contact)
         {
             var updatedContact = _addressBookBL.UpdateContact(id, contact);
             if (updatedContact == null) return NotFound();
