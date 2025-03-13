@@ -1,0 +1,20 @@
+.vs
+bin/
+obj/
+debug/
+Debug/
+# Other project folders
+BusinessLayer/obj/
+HelloGreetingApplication/obj/
+ModelLayer/obj/
+RepositoryLayer/obj/
+
+# Debug-specific files
+AddressBookSystem/bin/Debug/
+AddressBookSystem/bin/Release/
+BusinessLayer/bin/Debug/
+BusinessLayer/bin/Release/
+ModelLayer/bin/Debug/
+ModelLayer/bin/Release/
+RepositoryLayer/bin/Debug/
+RepositoryLayer/bin/Release/
