@@ -1,8 +1,6 @@
 using BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.Models;
-using FluentValidation;
-using FluentValidation.Results;
 using System.Collections.Generic;
 
 namespace AddressBookSystem.Controllers
@@ -12,12 +10,10 @@ namespace AddressBookSystem.Controllers
     public class AddressBookController : ControllerBase
     {
         private readonly IAddressBookBL _addressBookBL;
-        private readonly IValidator<AddressBookEntry> _validator;
 
-        public AddressBookController(IAddressBookBL addressBookBL, IValidator<AddressBookEntry> validator)
+        public AddressBookController(IAddressBookBL addressBookBL)
         {
             _addressBookBL = addressBookBL;
-            _validator = validator;
         }
 
         [HttpGet]
@@ -37,10 +33,6 @@ namespace AddressBookSystem.Controllers
         [HttpPost]
         public ActionResult<AddressBookEntry> AddContact([FromBody] AddressBookEntry contact)
         {
-            ValidationResult validationResult = _validator.Validate(contact);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
             var newContact = _addressBookBL.AddContact(contact);
             return CreatedAtAction(nameof(GetContactById), new { id = newContact.Id }, newContact);
         }
@@ -48,10 +40,6 @@ namespace AddressBookSystem.Controllers
         [HttpPut("{id}")]
         public ActionResult<AddressBookEntry> UpdateContact(int id, [FromBody] AddressBookEntry contact)
         {
-            ValidationResult validationResult = _validator.Validate(contact);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
             var updatedContact = _addressBookBL.UpdateContact(id, contact);
             if (updatedContact == null) return NotFound();
             return Ok(updatedContact);
