@@ -5,11 +5,10 @@ namespace RepositoryLayer.Context
 {
     public class AddressBookDbContext : DbContext
     {
-        public AddressBookDbContext(DbContextOptions<AddressBookDbContext> options) : base(options)
-        {
-        }
+        public AddressBookDbContext(DbContextOptions<AddressBookDbContext> options) : base(options) { }
 
+        public DbSet<User> Users { get; set; }
         public DbSet<AddressBookEntry> AddressBookEntries { get; set; }
-        public DbSet<User> Users { get; set; }  // ✅ Added Users table
     }
+
 }

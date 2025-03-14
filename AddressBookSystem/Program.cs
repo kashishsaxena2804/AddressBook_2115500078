@@ -18,6 +18,9 @@ builder.Services.AddDbContext<AddressBookDbContext>(options =>
 // 🔹 Register Dependencies
 builder.Services.AddScoped<IUserBL, UserBL>();
 builder.Services.AddScoped<IUserRL, UserRL>();
+builder.Services.AddScoped<IEmailService, EmailServiceBL>();
+
+
 
 // 🔹 Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"];

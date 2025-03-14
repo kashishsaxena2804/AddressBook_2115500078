@@ -1,5 +1,5 @@
-﻿using BusinessLayer.Interfaces;
-using ModelLayer.Models;
+﻿using ModelLayer.Models;
+using BusinessLayer.Interfaces;
 using RepositoryLayer.Interfaces;
 
 namespace BusinessLayer.Services
@@ -21,6 +21,16 @@ namespace BusinessLayer.Services
         public string Login(string email, string password)
         {
             return _userRL.Login(email, password);
+        }
+
+        public string GenerateResetToken(string email)
+        {
+            return _userRL.GenerateResetToken(email);
+        }
+
+        public bool ResetPassword(string email, string token, string newPassword)
+        {
+            return _userRL.ResetPassword(email, token, newPassword);
         }
     }
 }

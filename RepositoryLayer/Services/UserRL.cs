@@ -8,6 +8,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using System.Net.Mail;
+using System.Net;
 
 namespace RepositoryLayer.Services
 {
@@ -24,7 +27,7 @@ namespace RepositoryLayer.Services
 
         public User Register(User user)
         {
-            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password); // Hash password before storing
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             _context.Users.Add(user);
             _context.SaveChanges();
             return user;
@@ -34,7 +37,7 @@ namespace RepositoryLayer.Services
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-                return null; // Invalid login
+                return null;
 
             return GenerateJwtToken(user);
         }
@@ -59,6 +62,76 @@ namespace RepositoryLayer.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email);
+        }
+
+        public void SaveResetToken(string email, string token)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user != null)
+            {
+                user.ResetToken = token;
+                user.ResetTokenExpiry = DateTime.UtcNow.AddMinutes(30);
+                _context.SaveChanges();
+            }
+        }
+
+        public User GetUserByResetToken(string token)
+        {
+            return _context.Users.FirstOrDefault(u => u.ResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
+        }
+
+        public string GenerateResetToken(string email)
+        {
+            var user = GetUserByEmail(email);
+            if (user == null) return null;
+
+            string token = Guid.NewGuid().ToString();
+            SaveResetToken(email, token);
+
+            SendResetEmail(user.Email, token);
+            return token;
+        }
+
+        private void SendResetEmail(string toEmail, string token)
+        {
+            var smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
+            {
+                Port = int.Parse(_configuration["EmailSettings:Port"]),
+                Credentials = new NetworkCredential(
+                    _configuration["EmailSettings:SenderEmail"],
+                    _configuration["EmailSettings:SenderPassword"]),
+                EnableSsl = true
+            };
+
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_configuration["EmailSettings:SenderEmail"]),
+                Subject = "Password Reset",
+                Body = $"Use this token to reset your password: {token}",
+                IsBodyHtml = false,
+            };
+
+            mailMessage.To.Add(toEmail);
+            smtpClient.Send(mailMessage);
+        }
+
+        public bool ResetPassword(string email, string token, string newPassword)
+        {
+            var user = GetUserByResetToken(token);
+            if (user == null) return false;
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.ResetToken = "";
+            user.ResetTokenExpiry = null;
+            _context.SaveChanges();
+
+            return true;
         }
     }
 }
