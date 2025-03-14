@@ -1,7 +1,10 @@
 using BusinessLayer.Interfaces;
+using BusinessLayer.Services;
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.Models;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using System;
 
 namespace AddressBookSystem.Controllers
 {
@@ -10,10 +13,14 @@ namespace AddressBookSystem.Controllers
     public class AddressBookController : ControllerBase
     {
         private readonly IAddressBookBL _addressBookBL;
+        private readonly ICacheService _cacheService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AddressBookController(IAddressBookBL addressBookBL)
+        public AddressBookController(IAddressBookBL addressBookBL, ICacheService cacheService, IHttpContextAccessor httpContextAccessor)
         {
             _addressBookBL = addressBookBL;
+            _cacheService = cacheService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -59,5 +66,35 @@ namespace AddressBookSystem.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("all")]
+        public IActionResult GetAllContactsWithCache()
+        {
+            string cacheKey = "AllContacts";
+            var cachedData = _cacheService.GetData(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedData))
+                return Ok(JsonConvert.DeserializeObject<List<AddressBookEntry>>(cachedData));
+
+            var contacts = _addressBookBL.GetAllContacts();
+            _cacheService.SetData(cacheKey, JsonConvert.SerializeObject(contacts), TimeSpan.FromMinutes(10));
+
+            return Ok(contacts);
+        }
+
+        [HttpPost("store-session")]
+        public IActionResult StoreSession(string key, string value)
+        {
+            _httpContextAccessor.HttpContext.Session.SetString(key, value);
+            return Ok("Session data stored.");
+        }
+
+        [HttpGet("retrieve-session")]
+        public IActionResult RetrieveSession(string key)
+        {
+            string value = _httpContextAccessor.HttpContext.Session.GetString(key);
+            return Ok(value ?? "No data found.");
+        }
+
     }
 }
