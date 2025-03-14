@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AddressBookSystem.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AddressBookController : ControllerBase
     {
@@ -17,16 +17,19 @@ namespace AddressBookSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<AddressBookEntry>> GetAllContacts()
+        public ActionResult<IEnumerable<AddressBookEntry>> GetAllContacts()
         {
-            return Ok(_addressBookBL.GetAllContacts());
+            var contacts = _addressBookBL.GetAllContacts();
+            return Ok(contacts);
         }
 
         [HttpGet("{id}")]
         public ActionResult<AddressBookEntry> GetContactById(int id)
         {
             var contact = _addressBookBL.GetContactById(id);
-            if (contact == null) return NotFound();
+            if (contact == null)
+                return NotFound(new { message = "Contact not found" });
+
             return Ok(contact);
         }
 
@@ -41,14 +44,19 @@ namespace AddressBookSystem.Controllers
         public ActionResult<AddressBookEntry> UpdateContact(int id, [FromBody] AddressBookEntry contact)
         {
             var updatedContact = _addressBookBL.UpdateContact(id, contact);
-            if (updatedContact == null) return NotFound();
+            if (updatedContact == null)
+                return NotFound(new { message = "Contact not found" });
+
             return Ok(updatedContact);
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeleteContact(int id)
         {
-            if (!_addressBookBL.DeleteContact(id)) return NotFound();
+            bool isDeleted = _addressBookBL.DeleteContact(id);
+            if (!isDeleted)
+                return NotFound(new { message = "Contact not found" });
+
             return NoContent();
         }
     }

@@ -11,7 +11,7 @@ using RepositoryLayer.Context;
 namespace RepositoryLayer.Migrations
 {
     [DbContext(typeof(AddressBookDbContext))]
-    [Migration("20250313154702_InitialMigration")]
+    [Migration("20250314162413_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,7 +23,7 @@ namespace RepositoryLayer.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ModelLayer.DTO.AddressBookDTO", b =>
+            modelBuilder.Entity("ModelLayer.Models.AddressBookEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,6 +50,31 @@ namespace RepositoryLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AddressBookEntries");
+                });
+
+            modelBuilder.Entity("ModelLayer.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

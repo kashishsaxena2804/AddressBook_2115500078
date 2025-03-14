@@ -1,44 +1,86 @@
-using BusinessLayer.Interfaces;
-using BusinessLayer.Mappings;
+﻿using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
-using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ModelLayer.Models;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Database Connection
+// 🔹 Add DbContext with SQL Server
 builder.Services.AddDbContext<AddressBookDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configure Dependency Injection
-builder.Services.AddScoped<IAddressBookRL, AddressBookRL>();
-builder.Services.AddScoped<IAddressBookBL, AddressBookBL>();
+// 🔹 Register Dependencies
+builder.Services.AddScoped<IUserBL, UserBL>();
+builder.Services.AddScoped<IUserRL, UserRL>();
 
-// Add Controllers and Swagger
+// 🔹 Configure JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"];
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = key
+        };
+    });
+
+// 🔹 Add Controllers
 builder.Services.AddControllers();
+
+// 🔹 Add Swagger with JWT Support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Address Book API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AddressBook API", Version = "v1" });
+
+    // Add JWT Auth to Swagger UI
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer {token}'"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] { }
+        }
+    });
 });
 
-builder.Services.AddAutoMapper(typeof(AddressBookMappingProfile));
-builder.Services.AddScoped<IValidator<AddressBookEntry>, AddressBookEntryValidator>();
-
+// 🔹 Build & Run
 var app = builder.Build();
 
-// Configure Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
