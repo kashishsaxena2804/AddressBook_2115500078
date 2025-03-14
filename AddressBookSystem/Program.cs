@@ -1,7 +1,10 @@
 using BusinessLayer.Interfaces;
+using BusinessLayer.Mappings;
 using BusinessLayer.Services;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ModelLayer.Models;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
@@ -23,6 +26,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Address Book API", Version = "v1" });
 });
+
+builder.Services.AddAutoMapper(typeof(AddressBookMappingProfile));
+builder.Services.AddScoped<IValidator<AddressBookEntry>, AddressBookEntryValidator>();
 
 var app = builder.Build();
 
