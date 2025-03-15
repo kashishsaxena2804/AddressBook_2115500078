@@ -9,6 +9,7 @@ using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
 using StackExchange.Redis;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -84,6 +85,10 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "AddressBook API", Version = "v1" });
 
+    // Enable XML Documentation
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
     // Add JWT Auth to Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -106,6 +111,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 
 builder.Services.AddSingleton<IConnectionFactory>(sp =>
 {

@@ -4,6 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <DocumentationFile>bin\Debug\net6.0\AddressBookSystem.xml</DocumentationFile>
+
   </PropertyGroup>
 
   <ItemGroup>
