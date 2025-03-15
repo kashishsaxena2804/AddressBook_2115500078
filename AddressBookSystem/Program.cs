@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
@@ -70,6 +71,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
+
 
 
 // 🔹 Add Controllers
@@ -104,8 +107,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddSingleton<IConnectionFactory>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new ConnectionFactory
+    {
+        HostName = config["RabbitMQ:Host"],
+        UserName = config["RabbitMQ:Username"],
+        Password = config["RabbitMQ:Password"]
+    };
+});
+
+
 // 🔹 Build & Run
 var app = builder.Build();
+
+Task.Run(() =>
+{
+    var consumer = new RabbitMQConsumer();
+    consumer.StartConsuming();
+});
 
 if (app.Environment.IsDevelopment())
 {

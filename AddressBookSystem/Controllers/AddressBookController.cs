@@ -15,13 +15,17 @@ namespace AddressBookSystem.Controllers
         private readonly IAddressBookBL _addressBookBL;
         private readonly ICacheService _cacheService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRabbitMQProducer _rabbitMQProducer;
 
-        public AddressBookController(IAddressBookBL addressBookBL, ICacheService cacheService, IHttpContextAccessor httpContextAccessor)
+        public AddressBookController(IAddressBookBL addressBookBL, ICacheService cacheService, IHttpContextAccessor httpContextAccessor, IRabbitMQProducer rabbitMQProducer)
         {
             _addressBookBL = addressBookBL;
             _cacheService = cacheService;
             _httpContextAccessor = httpContextAccessor;
+            _rabbitMQProducer = rabbitMQProducer;
         }
+
+        
 
         [HttpGet]
         public ActionResult<IEnumerable<AddressBookEntry>> GetAllContacts()
@@ -44,6 +48,11 @@ namespace AddressBookSystem.Controllers
         public ActionResult<AddressBookEntry> AddContact([FromBody] AddressBookEntry contact)
         {
             var newContact = _addressBookBL.AddContact(contact);
+
+            // Convert object to JSON and publish to RabbitMQ
+            var message = JsonConvert.SerializeObject(newContact);
+            _rabbitMQProducer.PublishMessage("contactQueue", message);
+
             return CreatedAtAction(nameof(GetContactById), new { id = newContact.Id }, newContact);
         }
 
@@ -94,6 +103,19 @@ namespace AddressBookSystem.Controllers
         {
             string value = _httpContextAccessor.HttpContext.Session.GetString(key);
             return Ok(value ?? "No data found.");
+        }
+
+        [HttpPost("publish")]
+        public IActionResult PublishMessage([FromBody] RabbitMQMessageModel messageModel)
+        {
+            _rabbitMQProducer.PublishMessage(messageModel.QueueName, messageModel.Message);
+            return Ok(new { message = "Message published successfully!" });
+        }
+
+        public class RabbitMQMessageModel
+        {
+            public string QueueName { get; set; }
+            public string Message { get; set; }
         }
 
     }
